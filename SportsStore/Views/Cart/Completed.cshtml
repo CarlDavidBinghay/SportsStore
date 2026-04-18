@@ -1,0 +1,15 @@
+﻿@model int
+<style>
+    .completed-page { text-align: center; padding: 5rem 1rem; }
+    .completed-page h1 { font-size: 32px; font-weight: 700; margin-bottom: 1rem; }
+    .completed-page p { color: #6c757d; font-size: 15px; margin-bottom: .5rem; }
+    .btn-return { display: inline-block; margin-top: 1.5rem; padding: 10px 24px; background: #0d6efd; color: #fff; border-radius: 6px; text-decoration: none; font-size: 14px; }
+    .btn-return:hover { background: #0b5ed7; color: #fff; }
+</style>
+
+<div class="completed-page">
+    <h1>Thank you!</h1>
+    <p>Thanks for placing order #@Model</p>
+    <p>We'll ship your goods as soon as possible.</p>
+    <a asp-controller="Product" asp-action="List" class="btn-return">Return to Store</a>
+</div>

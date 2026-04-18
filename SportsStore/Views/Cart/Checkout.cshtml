@@ -1,0 +1,123 @@
+﻿@model SportsStore.Models.Order
+@{
+    var cart = ViewBag.Cart as SportsStore.Models.Cart;
+    var total = cart?.ComputeTotalValue() ?? 0;
+}
+
+<style>
+    .checkout-page { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    .checkout-nav { font-size: 13px; color: #6c757d; margin-bottom: 1.5rem; }
+    .checkout-nav a { color: #6c757d; text-decoration: none; }
+    .checkout-layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; align-items: start; }
+    .checkout-card { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    .checkout-card h5 { font-size: 15px; font-weight: 600; margin-bottom: 1.25rem; }
+    .form-label { font-size: 13px; color: #495057; margin-bottom: 4px; }
+    .form-control { border: 1px solid #dee2e6; border-radius: 6px; padding: 8px 12px; font-size: 14px; width: 100%; }
+    .form-control:focus { outline: none; border-color: #86b7fe; box-shadow: 0 0 0 3px rgba(13,110,253,.15); }
+    .summary-card { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; padding: 1.5rem; position: sticky; top: 1rem; }
+    .summary-card h5 { font-size: 15px; font-weight: 600; margin-bottom: 1rem; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #6c757d; padding: 4px 0; }
+    .summary-row .val { color: #212529; }
+    .summary-items { margin-bottom: .75rem; padding-bottom: .75rem; border-bottom: 1px solid #f0f0f0; }
+    .summary-item { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
+    .summary-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 600; padding: 12px 0; }
+    .btn-complete { width: 100%; padding: 12px; background: #212529; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; }
+    .btn-complete:hover { background: #343a40; }
+    .secure-note { text-align: center; font-size: 12px; color: #6c757d; margin-top: 8px; }
+    .back-link { text-align: center; font-size: 13px; color: #6c757d; margin-top: 6px; }
+    @@media(max-width:700px) { .checkout-layout { grid-template-columns: 1fr; } }
+</style>
+
+<div class="checkout-page">
+    <div class="checkout-nav">
+        <a href="/">Home</a> › <a asp-controller="Product" asp-action="List">Cart</a> › <span>Checkout</span>
+    </div>
+    <h2 style="font-size:22px;font-weight:600;margin-bottom:1.5rem;">Checkout</h2>
+
+    <form id="checkoutForm" asp-controller="Cart" asp-action="Checkout" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="checkout-layout">
+            <div>
+                <div class="checkout-card">
+                    <h5>Contact information</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Full name</label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger" style="font-size:12px"></span>
+                    </div>
+                </div>
+
+                <div class="checkout-card">
+                    <h5>Shipping address</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Address line 1</label>
+                        <input asp-for="AddressLine1" class="form-control" />
+                        <span asp-validation-for="AddressLine1" class="text-danger" style="font-size:12px"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address line 2 (optional)</label>
+                        <input asp-for="AddressLine2" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address line 3 (optional)</label>
+                        <input asp-for="AddressLine3" class="form-control" />
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">City</label>
+                            <input asp-for="City" class="form-control" />
+                            <span asp-validation-for="City" class="text-danger" style="font-size:12px"></span>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">State / Region</label>
+                            <input asp-for="State" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-2" style="max-width:200px">
+                        <label class="form-label">Zip / Postal code</label>
+                        <input asp-for="ZipCode" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="checkout-card">
+                    <h5>Options</h5>
+                    <div class="form-check">
+                        <input asp-for="GiftWrap" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label" style="font-size:14px">Gift wrap these items</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <h5>Order summary</h5>
+                <div class="summary-items">
+                    <div class="summary-row" style="font-weight:500;font-size:13px;margin-bottom:6px">
+                        <span>Items</span><span>Subtotal</span>
+                    </div>
+                    @if (cart != null)
+                    {
+                        @foreach (var line in cart.Lines)
+                        {
+                            <div class="summary-item">
+                                <span>@line.Product.Name × @line.Quantity</span>
+                                <span>₱@((line.Product.Price * line.Quantity).ToString("N2"))</span>
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="summary-row"><span>Shipping</span><span style="color:#198754;font-weight:500">Free</span></div>
+                <div class="summary-row"><span>Tax</span><span class="val">₱0.00</span></div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span>₱@total.ToString("N2")</span>
+                </div>
+                <button type="submit" class="btn-complete">Complete order ›</button>
+                <div class="secure-note">🔒 Secure checkout</div>
+                <div class="back-link">
+                    <a asp-controller="Product" asp-action="List" style="color:#6c757d;text-decoration:none">← Back to cart</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
